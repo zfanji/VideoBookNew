@@ -44,6 +44,7 @@ public class CacheAdapter extends BaseAdapter {
     public List<View> lstView=new ArrayList<View>();
     public int itemWidth = 360;
     public int itemHeight = 240;
+    public boolean isRefreshEnd = true;
   //  List<Integer> lstTimes= new ArrayList<Integer>();
    // long startTime=0;
 
@@ -102,7 +103,6 @@ public class CacheAdapter extends BaseAdapter {
             TextView size = (TextView) convertView.findViewById(R.id.text_video_size);
             TextView time = (TextView) convertView.findViewById(R.id.text_video_time);
 
-
             size.setText("size:"+String.valueOf(mItems.get(position).size/1024/1024)+"MB");
 
             long minute = mItems.get(position).time /1000 / 60;
@@ -122,6 +122,9 @@ public class CacheAdapter extends BaseAdapter {
             time.setText("mins:"+str_min + ":" + str_sec);
 
             textTitle.setText(mItems.get(position).title);
+
+            icon.setMaxWidth(this.itemWidth);
+            icon.setMaxHeight(this.itemHeight);
             new AsyncLoadImage().execute(new Object[] {icon,mItems.get(position).itemImageURL,this.itemWidth,this.itemHeight});
 
             lstPosition.add(position);//添加最新项
@@ -131,7 +134,11 @@ public class CacheAdapter extends BaseAdapter {
             convertView = lstView.get(lstPosition.indexOf(position));
         }
 
-
+        if(lstView.size()==mItems.size()){
+            this.isRefreshEnd = true;
+        }else {
+            this.isRefreshEnd = false;
+        }
 //        int endTime=(int) (System.nanoTime()-startTime);
 //        lstTimes.add(endTime);
 //        if(lstTimes.size()==10)
@@ -225,8 +232,8 @@ public class CacheAdapter extends BaseAdapter {
         return bitmap;
     }
 
-
     public void clearCache(){
+        this.mItems.clear();
         this.lstView.clear();
         this.lstPosition.clear();
     }

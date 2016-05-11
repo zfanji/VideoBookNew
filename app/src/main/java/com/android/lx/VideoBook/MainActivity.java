@@ -41,12 +41,21 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar.setLogo(R.drawable.vide_icon);
         setSupportActionBar(toolbar);
 
         mGridView = (GridView) findViewById(R.id.gridView);
         gridCacheAdapter =new CacheAdapter(this,R.layout.item);
+        provider = new VideoProvider(this);
 
-        if(this.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+        setLister();
+        refreshData();
+    }
+
+
+    private synchronized void refreshData() {
+        //刷新配置
+        if (this.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
             Log.i("info", "横屏");
             gridCacheAdapter.isLandscape = true;
             mGridView.setNumColumns(4);
@@ -56,11 +65,41 @@ public class MainActivity extends AppCompatActivity {
             mGridView.setNumColumns(2);
         }
 
-        provider = new VideoProvider(this);
-        videosList = provider.getList();
-        for(VideoData each : videosList){
-            gridCacheAdapter.addItem(each.getPath(),each.getTitle(),each.getSize(),each.getDuration());
-        };
+        WindowManager wm1 = this.getWindowManager();
+        int width1 = wm1.getDefaultDisplay().getWidth();
+        int height1 = wm1.getDefaultDisplay().getHeight();
+        gridCacheAdapter.itemWidth = getMinValue(width1, height1) * 50 / 100;
+        gridCacheAdapter.itemHeight = gridCacheAdapter.itemWidth * 240 / 360;
+        mGridView.setAdapter(gridCacheAdapter);
+
+        if(gridCacheAdapter.isRefreshEnd){
+            videosList = new ArrayList<VideoData>();
+            videosList.clear();
+            videosList = provider.getList();
+            gridCacheAdapter.clearCache();
+            for(VideoData each : videosList){
+                gridCacheAdapter.addItem(each.getPath(),each.getTitle(),each.getSize(),each.getDuration());
+            };
+            gridCacheAdapter.notifyDataSetChanged();
+        }
+
+    }
+    private int getMinValue(int value1,int value2){
+        return value1>value2 ? value2:value1;
+    }
+
+    @Override
+    protected void onPostResume() {
+        super.onPostResume();
+    }
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+
+    private void setLister(){
 
         mGridView.setOnItemClickListener(new OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
@@ -84,29 +123,7 @@ public class MainActivity extends AppCompatActivity {
                         .setAction("Action", null).show();
             }
         });
-        ////////////////////////
-        WindowManager wm1 = this.getWindowManager();
-        int width1 = wm1.getDefaultDisplay().getWidth();
-        int height1 = wm1.getDefaultDisplay().getHeight();
-       // Log.d(TAG,"~~~~~x="+width1+" y="+height1);
-        gridCacheAdapter.itemWidth = getMinValue(width1,height1)*50/100;
-        gridCacheAdapter.itemHeight = gridCacheAdapter.itemWidth*240/360;
-       // Log.d(TAG,"~~~~~w="+gridCacheAdapter.itemWidth+" h="+gridCacheAdapter.itemHeight);
-        mGridView.setAdapter(gridCacheAdapter);
-    }
 
-    private int getMinValue(int value1,int value2){
-        return value1>value2 ? value2:value1;
-    }
-
-    @Override
-    protected void onPostResume() {
-        super.onPostResume();
-    }
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
     }
 
     @Override
@@ -118,6 +135,9 @@ public class MainActivity extends AppCompatActivity {
         }else if (id == R.id.action_about) {
             Log.d(TAG,"is About");
             return true;
+        }else if (id == R.id.action_refresh){
+            Log.d(TAG,"is refresh");
+            refreshData();
         }
 
         return super.onOptionsItemSelected(item);

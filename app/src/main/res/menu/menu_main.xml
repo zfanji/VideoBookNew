@@ -2,6 +2,13 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="com.android.lamvu.VideoBook.MainActivity">
+
+    <item android:id="@+id/action_refresh"
+        android:title="@string/action_refresh"
+        android:orderInCategory="80"
+        android:icon="@android:drawable/stat_notify_sync_noanim"
+        app:showAsAction="ifRoom" />
+
     <item
         android:id="@+id/action_settings"
         android:orderInCategory="100"
@@ -12,4 +19,6 @@
         android:orderInCategory="100"
         android:title="@string/action_about"
         app:showAsAction="never" />
+
+
 </menu>
