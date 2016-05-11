@@ -43,10 +43,8 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-
         mGridView = (GridView) findViewById(R.id.gridView);
         gridCacheAdapter =new CacheAdapter(this,R.layout.item);
-
 
         if(this.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
             Log.i("info", "横屏");
@@ -94,7 +92,6 @@ public class MainActivity extends AppCompatActivity {
         gridCacheAdapter.itemWidth = getMinValue(width1,height1)*50/100;
         gridCacheAdapter.itemHeight = gridCacheAdapter.itemWidth*240/360;
        // Log.d(TAG,"~~~~~w="+gridCacheAdapter.itemWidth+" h="+gridCacheAdapter.itemHeight);
-
         mGridView.setAdapter(gridCacheAdapter);
     }
 
@@ -136,10 +133,14 @@ public class MainActivity extends AppCompatActivity {
         //Configuration.ORIENTATION_PORTRAIT 表示竖向
         //Configuration.ORIENTATION_LANDSCAPE 表示横屏
       //  mGridView.getSelection(0);
+        int lastIndex = mGridView.getFirstVisiblePosition();
+        Log.d(TAG,"mGridView.first()="+mGridView.getFirstVisiblePosition());
+        Log.d(TAG,"mGridView.last()="+mGridView.getLastVisiblePosition());
         if(newConfig.orientation==Configuration.ORIENTATION_PORTRAIT){
             Toast.makeText(MainActivity.this, "现在是竖屏", Toast.LENGTH_SHORT).show();
             gridCacheAdapter.isLandscape=true;
             mGridView.setNumColumns(2);
+            mGridView.setSelection(lastIndex);
             gridCacheAdapter.notifyDataSetChanged();
            // mGridView.setSelection();
         }
@@ -147,8 +148,10 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(MainActivity.this, "现在是横屏", Toast.LENGTH_SHORT).show();
             gridCacheAdapter.isLandscape=false;
             mGridView.setNumColumns(4);
+            mGridView.setSelection(lastIndex);
             gridCacheAdapter.notifyDataSetChanged();
         }
+
     }
 
 }
