@@ -43,7 +43,7 @@ public class CacheAdapter extends BaseAdapter {
     public List<Integer> lstPosition=new ArrayList<Integer>();
     public List<View> lstView=new ArrayList<View>();
     public int itemWidth = 360;
-
+    public int itemHeight = 240;
   //  List<Integer> lstTimes= new ArrayList<Integer>();
    // long startTime=0;
 
@@ -122,7 +122,7 @@ public class CacheAdapter extends BaseAdapter {
             time.setText("mins:"+str_min + ":" + str_sec);
 
             textTitle.setText(mItems.get(position).title);
-            new AsyncLoadImage().execute(new Object[] {icon,mItems.get(position).itemImageURL,this.itemWidth});
+            new AsyncLoadImage().execute(new Object[] {icon,mItems.get(position).itemImageURL,this.itemWidth,this.itemHeight});
 
             lstPosition.add(position);//添加最新项
             lstView.add(convertView);//添加最新项
@@ -161,9 +161,9 @@ public class CacheAdapter extends BaseAdapter {
             String url=(String) params[1];
            // Bitmap bitmap = ReadBitmapById(mContext,R.drawable.ic_launcher);
             int width = (int) params[2];
-            int height = width*240/360;
+            int height =(int) params[3];
 
-            Log.d(TAG,"width="+width+"height="+height);
+          //  Log.d(TAG,"width="+width+"height="+height);
 
             Bitmap bitmap = getVideoThumbnail(url, width, height, MediaStore.Video.Thumbnails.FULL_SCREEN_KIND);
             publishProgress(new Object[] {imageView, bitmap});

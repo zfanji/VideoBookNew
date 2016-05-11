@@ -21,6 +21,7 @@ import android.widget.Toast;
 import com.android.lx.VideoBook.adapter.CacheAdapter;
 import com.android.lx.VideoBook.model.VideoProvider;
 import com.android.lx.VideoBook.persion.VideoData;
+import com.android.lx.VideoBook.util.ScreenChange;
 
 import java.util.ArrayList;
 
@@ -42,14 +43,10 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        WindowManager wm1 = this.getWindowManager();
-        int width1 = wm1.getDefaultDisplay().getWidth();
-        int height1 = wm1.getDefaultDisplay().getHeight();
-        Log.w(TAG,"width1="+width1+"  height1="+height1);
 
         mGridView = (GridView) findViewById(R.id.gridView);
         gridCacheAdapter =new CacheAdapter(this,R.layout.item);
-        gridCacheAdapter.itemWidth = width1*50/100;
+
 
         if(this.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
             Log.i("info", "横屏");
@@ -89,8 +86,25 @@ public class MainActivity extends AppCompatActivity {
                         .setAction("Action", null).show();
             }
         });
+        ////////////////////////
+        WindowManager wm1 = this.getWindowManager();
+        int width1 = wm1.getDefaultDisplay().getWidth();
+        int height1 = wm1.getDefaultDisplay().getHeight();
+       // Log.d(TAG,"~~~~~x="+width1+" y="+height1);
+        gridCacheAdapter.itemWidth = getMinValue(width1,height1)*50/100;
+        gridCacheAdapter.itemHeight = gridCacheAdapter.itemWidth*240/360;
+       // Log.d(TAG,"~~~~~w="+gridCacheAdapter.itemWidth+" h="+gridCacheAdapter.itemHeight);
 
         mGridView.setAdapter(gridCacheAdapter);
+    }
+
+    private int getMinValue(int value1,int value2){
+        return value1>value2 ? value2:value1;
+    }
+
+    @Override
+    protected void onPostResume() {
+        super.onPostResume();
     }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -121,11 +135,13 @@ public class MainActivity extends AppCompatActivity {
         //newConfig.orientation获得当前屏幕状态是横向或者竖向
         //Configuration.ORIENTATION_PORTRAIT 表示竖向
         //Configuration.ORIENTATION_LANDSCAPE 表示横屏
+      //  mGridView.getSelection(0);
         if(newConfig.orientation==Configuration.ORIENTATION_PORTRAIT){
             Toast.makeText(MainActivity.this, "现在是竖屏", Toast.LENGTH_SHORT).show();
             gridCacheAdapter.isLandscape=true;
             mGridView.setNumColumns(2);
             gridCacheAdapter.notifyDataSetChanged();
+           // mGridView.setSelection();
         }
         if(newConfig.orientation==Configuration.ORIENTATION_LANDSCAPE){
             Toast.makeText(MainActivity.this, "现在是横屏", Toast.LENGTH_SHORT).show();
