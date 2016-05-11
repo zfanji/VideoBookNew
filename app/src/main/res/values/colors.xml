@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#3F51B5</color>
+    <color name="colorPrimaryDark">#303F9F</color>
+    <color name="colorAccent">#FF4081</color>
+    <color name="blue">#00abea</color>
+    <color name="white">#ffffff</color>
+    <color name="ics_blue">#ff33b5e5</color>
+    <color name="color_videofolder_group">#ffc0c0c0</color>
+    <color name="color_videofolder_child">#ff33b5e5</color>
+    <color name="grid_view_text_color">#ff404040</color>
+    <color name="grid_view_text_info_color">#ff606060</color>
+    <color name="half_transparent">#80000000</color>
+    <color name="sound_level">#ff009688</color>
+    <color name="sound_background">#4c000000</color>
+</resources>
