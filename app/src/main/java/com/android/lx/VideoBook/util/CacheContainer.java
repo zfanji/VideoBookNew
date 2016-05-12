@@ -53,7 +53,6 @@ public class CacheContainer {
 		if(mMemoryCache.get(key) != null) {
 			return mMemoryCache.get(key);
 		}
-		
 		return null;
 	}
 	

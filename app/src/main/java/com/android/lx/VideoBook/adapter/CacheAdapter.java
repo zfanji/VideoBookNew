@@ -36,20 +36,17 @@ import java.util.List;
  */
 public class CacheAdapter extends BaseAdapter {
     private static final String TAG = "CacheAdapter";
+
     private ImageDownloader downloader;
 
-    public boolean isLandscape=false;
     private Context mContext;
     private ArrayList<Item> mItems = new ArrayList<Item>();
-    LayoutInflater inflater;
+    private LayoutInflater inflater;
     private int layoutResourceId;
     public List<Integer> lstPosition=new ArrayList<Integer>();
     public List<View> lstView=new ArrayList<View>();
     public int itemWidth = 360;
     public int itemHeight = 240;
-    public boolean isRefreshEnd = true;
-  //  List<Integer> lstTimes= new ArrayList<Integer>();
-   // long startTime=0;
 
     public class Item {
         public String itemImageURL;
@@ -97,10 +94,10 @@ public class CacheAdapter extends BaseAdapter {
     }
     public View getView(int position, View convertView, ViewGroup parent) {
       //  Log.d(TAG,"getView="+position);
-       // startTime=System.nanoTime();
+
         ViewHolder holder = new ViewHolder();
         if (lstPosition.contains(position) == false) {
-            if(lstPosition.size()>75)//这里设置缓存的Item数量
+            if(lstPosition.size()>100)//这里设置缓存的Item数量
             {
                 lstPosition.remove(0);//删除第一项
                 lstView.remove(0);//删除第一项
@@ -136,7 +133,6 @@ public class CacheAdapter extends BaseAdapter {
             holder.icon.setMaxHeight(this.itemHeight);
             Log.d(TAG,""+itemWidth+"--"+itemHeight);
             downloader.download(holder.icon, position,itemWidth,itemHeight);
-//            new AsyncLoadImage().execute(new Object[] {icon,mItems.get(position).itemImageURL,this.itemWidth,this.itemHeight});
 
             lstPosition.add(position);//添加最新项
             lstView.add(convertView);//添加最新项
@@ -144,25 +140,6 @@ public class CacheAdapter extends BaseAdapter {
         {
             convertView = lstView.get(lstPosition.indexOf(position));
         }
-
-        if(lstView.size()==mItems.size()){
-            this.isRefreshEnd = true;
-        }else {
-            this.isRefreshEnd = false;
-        }
-//        int endTime=(int) (System.nanoTime()-startTime);
-//        lstTimes.add(endTime);
-//        if(lstTimes.size()==10)
-//        {
-//            int total=0;
-//            for(int i=0;i<lstTimes.size();i++)
-//                total=total+lstTimes.get(i);
-//
-//            Log.e("10个所花的时间：" +total/1000 +" μs",
-//                    "所用内存："+Runtime.getRuntime().totalMemory()/1024 +" KB");
-//            lstTimes.clear();
-//        }
-
 
         return convertView;
     }

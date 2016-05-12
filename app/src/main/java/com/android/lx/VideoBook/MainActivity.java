@@ -43,7 +43,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        //toolbar.setLogo(R.drawable.vide_icon);
         setSupportActionBar(toolbar);
 
         singleton = VideoBookApplication.getInstance();
@@ -52,21 +51,18 @@ public class MainActivity extends AppCompatActivity {
         mGridView = (GridView) findViewById(R.id.gridView);
         gridCacheAdapter =new CacheAdapter(this,R.layout.item);
         provider = new VideoProvider(this);
+        videosList = new ArrayList<VideoData>();
 
         setLister();
-        refreshData();
+        initData();
     }
 
 
-    private synchronized void refreshData() {
+    private synchronized void initData() {
         //刷新配置
         if (this.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            Log.i("info", "横屏");
-            gridCacheAdapter.isLandscape = true;
             mGridView.setNumColumns(4);
         } else if (this.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
-            Log.i("info", "竖屏");
-            gridCacheAdapter.isLandscape = false;
             mGridView.setNumColumns(2);
         }
 
@@ -77,9 +73,9 @@ public class MainActivity extends AppCompatActivity {
         gridCacheAdapter.itemHeight = gridCacheAdapter.itemWidth * 240 / 360;
         Log.d(TAG,"itemWidth="+gridCacheAdapter.itemWidth+" gridCacheAdapter="+gridCacheAdapter.itemHeight);
 
-        videosList = new ArrayList<VideoData>();
         videosList.clear();
         videosList = provider.getList();
+
         gridCacheAdapter.clearCache();
         MainActivity.singleton.urls.clear();
 
@@ -144,12 +140,13 @@ public class MainActivity extends AppCompatActivity {
             return true;
         }else if (id == R.id.action_refresh){
             Log.d(TAG,"is refresh");
-            this.singleton.urls.clear();
-            cacheContainer.clear();
             refreshData();
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void refreshData() {
     }
 
     /**
@@ -158,24 +155,19 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        //newConfig.orientation获得当前屏幕状态是横向或者竖向
-        //Configuration.ORIENTATION_PORTRAIT 表示竖向
-        //Configuration.ORIENTATION_LANDSCAPE 表示横屏
-      //  mGridView.getSelection(0);
+
         int lastIndex = mGridView.getFirstVisiblePosition();
         Log.d(TAG,"mGridView.first()="+mGridView.getFirstVisiblePosition());
         Log.d(TAG,"mGridView.last()="+mGridView.getLastVisiblePosition());
         if(newConfig.orientation==Configuration.ORIENTATION_PORTRAIT){
-            Toast.makeText(MainActivity.this, "现在是竖屏", Toast.LENGTH_SHORT).show();
-            gridCacheAdapter.isLandscape=true;
+           // Toast.makeText(MainActivity.this, "现在是竖屏", Toast.LENGTH_SHORT).show();
             mGridView.setNumColumns(2);
             mGridView.setSelection(lastIndex);
             gridCacheAdapter.notifyDataSetChanged();
            // mGridView.setSelection();
         }
         if(newConfig.orientation==Configuration.ORIENTATION_LANDSCAPE){
-            Toast.makeText(MainActivity.this, "现在是横屏", Toast.LENGTH_SHORT).show();
-            gridCacheAdapter.isLandscape=false;
+         // Toast.makeText(MainActivity.this, "现在是横屏", Toast.LENGTH_SHORT).show();
             mGridView.setNumColumns(4);
             mGridView.setSelection(lastIndex);
             gridCacheAdapter.notifyDataSetChanged();
@@ -183,6 +175,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    //返回键
     private long exitTime = 0;
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {

@@ -5,7 +5,6 @@ import android.graphics.BitmapFactory;
 import android.media.ThumbnailUtils;
 import android.os.AsyncTask;
 import android.provider.MediaStore;
-import android.util.Log;
 import android.widget.ImageView;
 
 import com.android.lx.VideoBook.VideoBookApplication;
@@ -184,7 +183,7 @@ public class ImageAsyncTask {
 	 */
 	private Bitmap getVideoThumbnail(String videoPath, int width , int height, int kind){
 		Bitmap bitmap = null;
-		Log.d(TAG,"width="+width+" height="+height);
+	//	Log.d(TAG,"width="+width+" height="+height);
 		bitmap = ThumbnailUtils.createVideoThumbnail(videoPath, kind);
 		bitmap = ThumbnailUtils.extractThumbnail(bitmap, width, height, ThumbnailUtils.OPTIONS_RECYCLE_INPUT);
 		return bitmap;
