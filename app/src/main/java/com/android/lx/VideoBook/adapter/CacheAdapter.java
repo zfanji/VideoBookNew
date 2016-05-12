@@ -66,7 +66,6 @@ public class CacheAdapter extends BaseAdapter {
 
     }
 
-
     public CacheAdapter(Context c,int layoutResourceId) {
         this.mContext = c;
         this.layoutResourceId = layoutResourceId;
@@ -90,11 +89,16 @@ public class CacheAdapter extends BaseAdapter {
         return position;
     }
 
-
+    private class ViewHolder {
+        TextView textTitle;
+        ImageView icon;
+        TextView size;
+        TextView time;
+    }
     public View getView(int position, View convertView, ViewGroup parent) {
       //  Log.d(TAG,"getView="+position);
        // startTime=System.nanoTime();
-
+        ViewHolder holder = new ViewHolder();
         if (lstPosition.contains(position) == false) {
             if(lstPosition.size()>75)//这里设置缓存的Item数量
             {
@@ -102,12 +106,12 @@ public class CacheAdapter extends BaseAdapter {
                 lstView.remove(0);//删除第一项
             }
             convertView = inflater.inflate(layoutResourceId, null);
-            TextView textTitle = (TextView) convertView.findViewById(R.id.text_video_title);
-            ImageView icon = (ImageView) convertView.findViewById(R.id.video_image);
-            TextView size = (TextView) convertView.findViewById(R.id.text_video_size);
-            TextView time = (TextView) convertView.findViewById(R.id.text_video_time);
+            holder.textTitle = (TextView) convertView.findViewById(R.id.text_video_title);
+            holder.icon = (ImageView) convertView.findViewById(R.id.video_image);
+            holder.size = (TextView) convertView.findViewById(R.id.text_video_size);
+            holder.time = (TextView) convertView.findViewById(R.id.text_video_time);
 
-            size.setText("size:"+String.valueOf(mItems.get(position).size/1024/1024)+"MB");
+            holder.size.setText("size:"+String.valueOf(mItems.get(position).size/1024/1024)+"MB");
 
             long minute = mItems.get(position).time /1000 / 60;
             long second = mItems.get(position).time /1000 % 60;
@@ -123,15 +127,15 @@ public class CacheAdapter extends BaseAdapter {
             }else {
                 str_sec = String.valueOf(second);
             }
-            time.setText("mins:"+str_min + ":" + str_sec);
+            holder.time.setText("mins:"+str_min + ":" + str_sec);
 
-            textTitle.setText(""+position+"("+mItems.get(position).title);
+            holder.textTitle.setText(""+position+"("+mItems.get(position).title);
 
 
-            icon.setMaxWidth(this.itemWidth);
-            icon.setMaxHeight(this.itemHeight);
+            holder.icon.setMaxWidth(this.itemWidth);
+            holder.icon.setMaxHeight(this.itemHeight);
             Log.d(TAG,""+itemWidth+"--"+itemHeight);
-            downloader.download(icon, position,itemWidth,itemHeight);
+            downloader.download(holder.icon, position,itemWidth,itemHeight);
 //            new AsyncLoadImage().execute(new Object[] {icon,mItems.get(position).itemImageURL,this.itemWidth,this.itemHeight});
 
             lstPosition.add(position);//添加最新项

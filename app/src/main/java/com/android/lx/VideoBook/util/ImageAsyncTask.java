@@ -201,7 +201,8 @@ public class ImageAsyncTask {
     BitmapFactory.Options options = new BitmapFactory.Options();
     options.inInputShareable = true;
     options.inDither=false;
-    options.inTempStorage=new byte[32 * 1024];
+	options.inPreferredConfig = Bitmap.Config.RGB_565;
+	options.inTempStorage=new byte[32 * 1024];
     options.inPurgeable = true;
     options.inJustDecodeBounds = false;
     options.inSampleSize = 1;//不要缩放

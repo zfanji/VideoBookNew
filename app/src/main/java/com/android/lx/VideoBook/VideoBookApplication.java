@@ -48,10 +48,10 @@ public class VideoBookApplication extends Application {
 		imageTaskCache = new LinkedHashMap<ImageView, ImageAsyncTask>();
 		urls = new LinkedList<VideoData>();
 		
-    File file = new File(directory);
-    if(!file.exists()) {
-    	file.mkdir();
-    }          		
+		File file = new File(directory);
+		if(!file.exists()) {
+			file.mkdir();
+		}
 	}
 	
 	// This method replaces url to filename.
