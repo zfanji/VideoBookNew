@@ -19,6 +19,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.android.lx.VideoBook.R;
+import com.android.lx.VideoBook.VideoBookApplication;
+import com.android.lx.VideoBook.persion.VideoData;
 import com.android.lx.VideoBook.util.ImageDownloader;
 
 import java.io.IOException;
@@ -27,6 +29,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -37,14 +40,14 @@ import java.util.List;
 public class CacheAdapter extends BaseAdapter {
     private static final String TAG = "CacheAdapter";
 
+    private static VideoBookApplication singleton;
     private ImageDownloader downloader;
 
     private Context mContext;
-    private ArrayList<Item> mItems = new ArrayList<Item>();
     private LayoutInflater inflater;
     private int layoutResourceId;
-    public List<Integer> lstPosition=new ArrayList<Integer>();
-    public List<View> lstView=new ArrayList<View>();
+   // public List<Integer> lstPosition=new ArrayList<Integer>();
+   // public LinkedList<View> lstView=new LinkedList<View>();
     public int itemWidth = 360;
     public int itemHeight = 240;
 
@@ -67,24 +70,27 @@ public class CacheAdapter extends BaseAdapter {
         this.mContext = c;
         this.layoutResourceId = layoutResourceId;
         this.downloader = new ImageDownloader();
+        this.singleton = VideoBookApplication.getInstance();
         inflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
 
-    public void addItem(String itemImageURL,String itemTitle,long size,long time) {
-        mItems.add(new Item(itemImageURL, itemTitle,size,time));
-    }
-
+    @Override
     public int getCount() {
-        return mItems.size();
+        return singleton.urls.size();
     }
 
-    public Item getItem(int position) {
-        return mItems.get(position);
+    @Override
+    public Object getItem(int position) {
+        // TODO Auto-generated method stub
+        return singleton.urls.get(position);
     }
 
+    @Override
     public long getItemId(int position) {
+        // TODO Auto-generated method stub
         return position;
     }
+
 
     private class ViewHolder {
         TextView textTitle;
@@ -93,25 +99,22 @@ public class CacheAdapter extends BaseAdapter {
         TextView time;
     }
     public View getView(int position, View convertView, ViewGroup parent) {
-      //  Log.d(TAG,"getView="+position);
+        Log.d(TAG,"getView="+position);
+        convertView = this.singleton.urls.get(position).getSaveView();
+        if(convertView==null){
+            Log.d(TAG,"convertView is null----> "+position);
+            ViewHolder holder = new ViewHolder();
 
-        ViewHolder holder = new ViewHolder();
-        if (lstPosition.contains(position) == false) {
-            if(lstPosition.size()>100)//这里设置缓存的Item数量
-            {
-                lstPosition.remove(0);//删除第一项
-                lstView.remove(0);//删除第一项
-            }
             convertView = inflater.inflate(layoutResourceId, null);
             holder.textTitle = (TextView) convertView.findViewById(R.id.text_video_title);
             holder.icon = (ImageView) convertView.findViewById(R.id.video_image);
             holder.size = (TextView) convertView.findViewById(R.id.text_video_size);
             holder.time = (TextView) convertView.findViewById(R.id.text_video_time);
 
-            holder.size.setText("size:"+String.valueOf(mItems.get(position).size/1024/1024)+"MB");
+            holder.size.setText("size:"+String.valueOf(singleton.urls.get(position).getSize()/1024/1024)+"MB");
 
-            long minute = mItems.get(position).time /1000 / 60;
-            long second = mItems.get(position).time /1000 % 60;
+            long minute = singleton.urls.get(position).getDuration() /1000 / 60;
+            long second = singleton.urls.get(position).getDuration() /1000 % 60;
             String str_min;
             String str_sec;
             if (minute<10){
@@ -126,103 +129,30 @@ public class CacheAdapter extends BaseAdapter {
             }
             holder.time.setText("mins:"+str_min + ":" + str_sec);
 
-            holder.textTitle.setText(""+position+"("+mItems.get(position).title);
-
+            holder.textTitle.setText(""+position+"("+singleton.urls.get(position).getDisplayName());
 
             holder.icon.setMaxWidth(this.itemWidth);
             holder.icon.setMaxHeight(this.itemHeight);
             Log.d(TAG,""+itemWidth+"--"+itemHeight);
             downloader.download(holder.icon, position,itemWidth,itemHeight);
 
-            lstPosition.add(position);//添加最新项
-            lstView.add(convertView);//添加最新项
-        } else
-        {
-            convertView = lstView.get(lstPosition.indexOf(position));
+            this.singleton.urls.get(position).setSaveView(convertView);
         }
 
         return convertView;
     }
 
-    /**
-     * 异步读取网络图片
-     * @author hellogv
-     */
-    class AsyncLoadImage extends AsyncTask<Object,Object,Void> {
-        @Override
-        protected Void doInBackground(Object... params) {
-
-            ImageView imageView=(ImageView) params[0];
-            String url=(String) params[1];
-           // Bitmap bitmap = ReadBitmapById(mContext,R.drawable.ic_launcher);
-            int width = (int) params[2];
-            int height =(int) params[3];
-
-          //  Log.d(TAG,"width="+width+"height="+height);
-
-            Bitmap bitmap = getVideoThumbnail(url, width, height, MediaStore.Video.Thumbnails.FULL_SCREEN_KIND);
-            publishProgress(new Object[] {imageView, bitmap});
-
-            return null;
-        }
-
-        protected void onProgressUpdate(Object... progress) {
-            ImageView imageView = (ImageView) progress[0];
-            imageView.setImageBitmap((Bitmap) progress[1]);
-        }
+    public void addItem(VideoData obj){
+        Log.d(TAG,"add "+obj.getPath());
+        this.singleton.urls.add(obj);
     }
 
-
-    /**
-     * 以最小内存读取本地资源的图片
-     * 但是会导致图片失真
-     * @param context
-     * @param resId
-     * @return
-     */
-    public static Bitmap ReadBitmapById(Context context, int resId) {
-        BitmapFactory.Options opt = new BitmapFactory.Options();
-        opt.inPreferredConfig = Bitmap.Config.RGB_565;
-        opt.inPurgeable = true;
-        opt.inInputShareable = true;
-        // 获取资源图片
-        InputStream is = context.getResources().openRawResource(resId);
-        Bitmap bitMap = BitmapFactory.decodeStream(is, null, opt);
-        try {
-            is.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return bitMap;
-    }
-    /**
-     * 获取视频缩略图
-     * @param videoPath
-     * @param width
-     * @param height
-     * @param kind
-     * @return
-     */
-    private Bitmap getVideoThumbnail(String videoPath, int width , int height, int kind){
-        Bitmap bitmap = null;
-        bitmap = ThumbnailUtils.createVideoThumbnail(videoPath, kind);
-        bitmap = ThumbnailUtils.extractThumbnail(bitmap, width, height, ThumbnailUtils.OPTIONS_RECYCLE_INPUT);
-        return bitmap;
+    public void removeItem(VideoData obj){
+        Log.d(TAG,"remove "+obj.getPath());
+        this.singleton.urls.remove(obj);
     }
 
-    static public Bitmap getBitmapByUrl(String urlString)
-            throws MalformedURLException, IOException {
-        URL url = new URL(urlString);
-        URLConnection connection = url.openConnection();
-        connection.setConnectTimeout(25000);
-        connection.setReadTimeout(90000);
-        Bitmap bitmap = BitmapFactory.decodeStream(connection.getInputStream());
-        return bitmap;
-    }
-
-    public void clearCache(){
-        this.mItems.clear();
-        this.lstView.clear();
-        this.lstPosition.clear();
+    public void removeAllItem(){
+        this.singleton.urls.clear();
     }
 }

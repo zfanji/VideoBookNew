@@ -3,6 +3,7 @@ package com.android.lx.VideoBook.util;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.support.v4.util.LruCache;
+import android.util.Log;
 
 import java.io.File;
 
@@ -51,6 +52,7 @@ public class CacheContainer {
 	
 	public static Object getMemory(String key) {
 		if(mMemoryCache.get(key) != null) {
+			Log.d(TAG,"get bitmap form memoryCache");
 			return mMemoryCache.get(key);
 		}
 		return null;

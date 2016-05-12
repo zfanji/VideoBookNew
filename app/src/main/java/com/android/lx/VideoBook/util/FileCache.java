@@ -84,7 +84,7 @@ public class FileCache {
 			
 			if(fInfo.file.exists()) {
 				moveFileInfoToLast(fileName, fInfo);
-				//Log.d(TAG, "get file From Cache");
+				Log.d(TAG, "get file From Cache");
 				return fInfo.file;
 			}
 						

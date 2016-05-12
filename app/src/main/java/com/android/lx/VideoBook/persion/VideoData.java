@@ -1,6 +1,8 @@
 package com.android.lx.VideoBook.persion;
 
 
+import android.view.View;
+
 import java.io.Serializable;
 
 /**
@@ -8,6 +10,7 @@ import java.io.Serializable;
  */
 public class VideoData implements Serializable {
     private int id;
+    private View saveView;
     private String title;
     private String album;
     private String artist;
@@ -120,6 +123,14 @@ public class VideoData implements Serializable {
 
     public void setDuration(long duration) {
         this.duration = duration;
+    }
+
+    public View getSaveView() {
+        return saveView;
+    }
+
+    public void setSaveView(View saveView) {
+        this.saveView = saveView;
     }
 
 //    public LoadedImage getImage(){

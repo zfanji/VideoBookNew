@@ -3,11 +3,11 @@ package com.android.lx.VideoBook.model;
 import android.content.Context;
 import android.database.Cursor;
 import android.provider.MediaStore;
+import android.util.Log;
 
 import com.android.lx.VideoBook.persion.VideoData;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedList;
 
 /**
  * Created by admin on 2016/5/9.
@@ -21,14 +21,15 @@ public class VideoProvider implements AbstructProvider {
         this.context = context;
     }
     @Override
-    public ArrayList<VideoData> getList() {
-        List<VideoData> list = null;
+    public LinkedList<VideoData> getList() {
+        Log.d(TAG,"getList");
+        LinkedList<VideoData> list = null;
         if (context != null) {
             Cursor cursor = context.getContentResolver().query(
                     MediaStore.Video.Media.EXTERNAL_CONTENT_URI, null, null,
                     null, null);
             if (cursor != null) {
-                list = new ArrayList<VideoData>();
+                list = new LinkedList<VideoData>();
                 while (cursor.moveToNext()) {
                     int id = cursor.getInt(cursor
                             .getColumnIndexOrThrow(MediaStore.Video.Media._ID));
@@ -58,15 +59,15 @@ public class VideoProvider implements AbstructProvider {
                                     .getColumnIndexOrThrow(MediaStore.Video.Media.SIZE));
                     VideoData video = new VideoData(id, displayName, album, artist,
                             displayName, mimeType, path, size, duration);
-//                    Log.d("11111111111", "<br/>id = "+id
-//                            +"<br/> , title = "+title
-//                            +"<br/> , album = "+album
-//                            +"<br/> , artist = "+artist
-//                            +"<br/> , displayName = "+displayName
-//                            +"<br/> , mimeType = "+mimeType
-//                            +"<br/> , path = "+path
-//                            +"<br/> , size = "+size
-//                            +"<br/> , duration = "+duration);
+                    Log.d("11111111111", "<br/>id = "+id
+                            +"<br/> , title = "+title
+                            +"<br/> , album = "+album
+                            +"<br/> , artist = "+artist
+                            +"<br/> , displayName = "+displayName
+                            +"<br/> , mimeType = "+mimeType
+                            +"<br/> , path = "+path
+                            +"<br/> , size = "+size
+                            +"<br/> , duration = "+duration);
 
                     if(path.contains(ASSIGN_PATH))
                     {
@@ -77,6 +78,6 @@ public class VideoProvider implements AbstructProvider {
                 cursor.close();
             }
         }
-        return (ArrayList<VideoData>) list;
+        return list;
     }
 }
