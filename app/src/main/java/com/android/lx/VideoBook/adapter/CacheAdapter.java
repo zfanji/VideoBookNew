@@ -19,6 +19,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.android.lx.VideoBook.R;
+import com.android.lx.VideoBook.util.ImageDownloader;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -35,6 +36,8 @@ import java.util.List;
  */
 public class CacheAdapter extends BaseAdapter {
     private static final String TAG = "CacheAdapter";
+    private ImageDownloader downloader;
+
     public boolean isLandscape=false;
     private Context mContext;
     private ArrayList<Item> mItems = new ArrayList<Item>();
@@ -67,6 +70,7 @@ public class CacheAdapter extends BaseAdapter {
     public CacheAdapter(Context c,int layoutResourceId) {
         this.mContext = c;
         this.layoutResourceId = layoutResourceId;
+        this.downloader = new ImageDownloader();
         inflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
 
@@ -121,11 +125,14 @@ public class CacheAdapter extends BaseAdapter {
             }
             time.setText("mins:"+str_min + ":" + str_sec);
 
-            textTitle.setText(mItems.get(position).title);
+            textTitle.setText(""+position+"("+mItems.get(position).title);
+
 
             icon.setMaxWidth(this.itemWidth);
             icon.setMaxHeight(this.itemHeight);
-            new AsyncLoadImage().execute(new Object[] {icon,mItems.get(position).itemImageURL,this.itemWidth,this.itemHeight});
+            Log.d(TAG,""+itemWidth+"--"+itemHeight);
+            downloader.download(icon, position,itemWidth,itemHeight);
+//            new AsyncLoadImage().execute(new Object[] {icon,mItems.get(position).itemImageURL,this.itemWidth,this.itemHeight});
 
             lstPosition.add(position);//添加最新项
             lstView.add(convertView);//添加最新项

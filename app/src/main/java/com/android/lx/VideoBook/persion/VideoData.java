@@ -1,8 +1,6 @@
 package com.android.lx.VideoBook.persion;
 
 
-import com.android.lx.VideoBook.util.LoadedImage;
-
 import java.io.Serializable;
 
 /**
@@ -18,7 +16,7 @@ public class VideoData implements Serializable {
     private String path;
     private long size;
     private long duration;
-    private LoadedImage image;
+   // private LoadedImage image;
 
     /**
      *
@@ -124,13 +122,13 @@ public class VideoData implements Serializable {
         this.duration = duration;
     }
 
-    public LoadedImage getImage(){
-        return image;
-
-    }
-
-    public void setImage(LoadedImage image){
-        this.image = image;
-    }
+//    public LoadedImage getImage(){
+//        return image;
+//
+//    }
+//
+//    public void setImage(LoadedImage image){
+//        this.image = image;
+//    }
 
 }

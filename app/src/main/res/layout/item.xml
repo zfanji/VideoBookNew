@@ -9,7 +9,7 @@
     
     <ImageView 
         android:id="@+id/video_image"
-        android:src="@drawable/vide_icon"
+        android:src="@drawable/ic_launcher"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:scaleType="fitCenter"/>

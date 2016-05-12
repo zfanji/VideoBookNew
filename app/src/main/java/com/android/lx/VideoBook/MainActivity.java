@@ -9,6 +9,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -21,19 +22,20 @@ import android.widget.Toast;
 import com.android.lx.VideoBook.adapter.CacheAdapter;
 import com.android.lx.VideoBook.model.VideoProvider;
 import com.android.lx.VideoBook.persion.VideoData;
-import com.android.lx.VideoBook.util.ScreenChange;
+import com.android.lx.VideoBook.util.CacheContainer;
 
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
+    private static VideoBookApplication singleton;
+
     private GridView mGridView;
     private CacheAdapter gridCacheAdapter;
 
     private ArrayList<VideoData> videosList;
     private VideoProvider provider;
-
-
+    private CacheContainer cacheContainer;
 
     private boolean isScreenDirection;
     @Override
@@ -41,8 +43,11 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        toolbar.setLogo(R.drawable.vide_icon);
+        //toolbar.setLogo(R.drawable.vide_icon);
         setSupportActionBar(toolbar);
+
+        singleton = VideoBookApplication.getInstance();
+        cacheContainer = new CacheContainer(this);
 
         mGridView = (GridView) findViewById(R.id.gridView);
         gridCacheAdapter =new CacheAdapter(this,R.layout.item);
@@ -70,19 +75,21 @@ public class MainActivity extends AppCompatActivity {
         int height1 = wm1.getDefaultDisplay().getHeight();
         gridCacheAdapter.itemWidth = getMinValue(width1, height1) * 50 / 100;
         gridCacheAdapter.itemHeight = gridCacheAdapter.itemWidth * 240 / 360;
+        Log.d(TAG,"itemWidth="+gridCacheAdapter.itemWidth+" gridCacheAdapter="+gridCacheAdapter.itemHeight);
+
+        videosList = new ArrayList<VideoData>();
+        videosList.clear();
+        videosList = provider.getList();
+        gridCacheAdapter.clearCache();
+        MainActivity.singleton.urls.clear();
+
+        for(VideoData each : videosList){
+            gridCacheAdapter.addItem(each.getPath(),each.getTitle(),each.getSize(),each.getDuration());
+            MainActivity.singleton.urls.add(each);
+        };
+
         mGridView.setAdapter(gridCacheAdapter);
-
-        if(gridCacheAdapter.isRefreshEnd){
-            videosList = new ArrayList<VideoData>();
-            videosList.clear();
-            videosList = provider.getList();
-            gridCacheAdapter.clearCache();
-            for(VideoData each : videosList){
-                gridCacheAdapter.addItem(each.getPath(),each.getTitle(),each.getSize(),each.getDuration());
-            };
-            gridCacheAdapter.notifyDataSetChanged();
-        }
-
+        gridCacheAdapter.notifyDataSetChanged();
     }
     private int getMinValue(int value1,int value2){
         return value1>value2 ? value2:value1;
@@ -137,6 +144,8 @@ public class MainActivity extends AppCompatActivity {
             return true;
         }else if (id == R.id.action_refresh){
             Log.d(TAG,"is refresh");
+            this.singleton.urls.clear();
+            cacheContainer.clear();
             refreshData();
         }
 
@@ -174,4 +183,19 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    private long exitTime = 0;
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if(keyCode == KeyEvent.KEYCODE_BACK && event.getAction() == KeyEvent.ACTION_DOWN){
+            if((System.currentTimeMillis()-exitTime) > 2000){
+                Toast.makeText(getApplicationContext(), "再按一次退出程序", Toast.LENGTH_SHORT).show();
+                exitTime = System.currentTimeMillis();
+            } else {
+                finish();
+                System.exit(0);
+            }
+            return true;
+        }
+        return super.onKeyDown(keyCode, event);
+    }
 }
