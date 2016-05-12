@@ -99,10 +99,10 @@ public class CacheAdapter extends BaseAdapter {
         TextView time;
     }
     public View getView(int position, View convertView, ViewGroup parent) {
-        Log.d(TAG,"getView="+position);
+       // Log.d(TAG,"getView="+position);
         convertView = this.singleton.urls.get(position).getSaveView();
         if(convertView==null){
-            Log.d(TAG,"convertView is null----> "+position);
+        //    Log.d(TAG,"convertView is null----> "+position);
             ViewHolder holder = new ViewHolder();
 
             convertView = inflater.inflate(layoutResourceId, null);

@@ -1,11 +1,16 @@
 package com.android.lx.VideoBook;
 
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -138,13 +143,14 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-        if (id == R.id.action_settings) {
-            Log.d(TAG,"is Settings");
+        if (id == R.id.action_about) {
+            Log.d(TAG,"is action_about");
+            this.aboutDialog();
             return true;
-        }else if (id == R.id.action_about) {
-            cacheContainer.clear();
-            Log.d(TAG,"is About");
-            return true;
+//        }else if (id == R.id.action_settings) {
+//            cacheContainer.clear();
+//            Log.d(TAG,"is About");
+//            return true;
         }else if (id == R.id.action_refresh){
             Log.d(TAG,"is refresh");
             refreshData();
@@ -262,5 +268,32 @@ public class MainActivity extends AppCompatActivity {
             return true;
         }
         return super.onKeyDown(keyCode, event);
+    }
+
+    private void aboutDialog(){
+        AlertDialog.Builder builder=new AlertDialog.Builder(this);  //先得到构造器
+        builder.setTitle("About"); //设置标题
+        String alert1 = "Version: "+getPackageInfo(this).versionName;
+        String alert2 = "Default Path："+VideoProvider.ASSIGN_PATH;
+        builder.setMessage(alert1 +"\n"+ alert2);
+        builder.setIcon(R.drawable.ic_launcher);//设置图标，图片id即可
+        //参数都设置完成了，创建并显示出来
+        builder.create().show();
+    }
+
+    private static PackageInfo getPackageInfo(Context context) {
+        PackageInfo pi = null;
+
+        try {
+            PackageManager pm = context.getPackageManager();
+            pi = pm.getPackageInfo(context.getPackageName(),
+                    PackageManager.GET_CONFIGURATIONS);
+
+            return pi;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return pi;
     }
 }

@@ -15,7 +15,7 @@ import java.util.LinkedList;
 public class VideoProvider implements AbstructProvider {
     private static final String TAG = "VideoProvider";
     private Context context;
-    private static final String ASSIGN_PATH = "/storage/emulated/0";
+    public static final String ASSIGN_PATH = "/storage/emulated/0/VideoBook";
 
     public VideoProvider(Context context) {
         this.context = context;
@@ -59,15 +59,15 @@ public class VideoProvider implements AbstructProvider {
                                     .getColumnIndexOrThrow(MediaStore.Video.Media.SIZE));
                     VideoData video = new VideoData(id, displayName, album, artist,
                             displayName, mimeType, path, size, duration);
-                    Log.d("11111111111", "<br/>id = "+id
-                            +"<br/> , title = "+title
-                            +"<br/> , album = "+album
-                            +"<br/> , artist = "+artist
-                            +"<br/> , displayName = "+displayName
-                            +"<br/> , mimeType = "+mimeType
-                            +"<br/> , path = "+path
-                            +"<br/> , size = "+size
-                            +"<br/> , duration = "+duration);
+//                    Log.d("11111111111", "<br/>id = "+id
+//                            +"<br/> , title = "+title
+//                            +"<br/> , album = "+album
+//                            +"<br/> , artist = "+artist
+//                            +"<br/> , displayName = "+displayName
+//                            +"<br/> , mimeType = "+mimeType
+//                            +"<br/> , path = "+path
+//                            +"<br/> , size = "+size
+//                            +"<br/> , duration = "+duration);
 
                     if(path.contains(ASSIGN_PATH))
                     {
