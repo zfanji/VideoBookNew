@@ -5,11 +5,6 @@ package com.android.lx.VideoBook.adapter;
  */
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.media.ThumbnailUtils;
-import android.os.AsyncTask;
-import android.provider.MediaStore;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,15 +17,6 @@ import com.android.lx.VideoBook.R;
 import com.android.lx.VideoBook.VideoBookApplication;
 import com.android.lx.VideoBook.persion.VideoData;
 import com.android.lx.VideoBook.util.ImageDownloader;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLConnection;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
 
 /**
  * 使用列表缓存过去的Item
@@ -129,7 +115,7 @@ public class CacheAdapter extends BaseAdapter {
             }
             holder.time.setText("mins:"+str_min + ":" + str_sec);
 
-            holder.textTitle.setText(""+position+"("+singleton.urls.get(position).getDisplayName());
+            holder.textTitle.setText(singleton.urls.get(position).getDisplayName());
 
             holder.icon.setMaxWidth(this.itemWidth);
             holder.icon.setMaxHeight(this.itemHeight);
