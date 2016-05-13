@@ -26,26 +26,19 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.lx.VideoBook.adapter.CacheAdapter;
+import com.android.lx.VideoBook.model.IUserView;
 import com.android.lx.VideoBook.model.VideoProvider;
-import com.android.lx.VideoBook.persion.VideoData;
-import com.android.lx.VideoBook.util.CacheContainer;
+import com.android.lx.VideoBook.util.DataCleanManager;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
+import java.io.File;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements IUserView{
     private static final String TAG = "MainActivity";
     private static VideoBookApplication singleton;
 
     private GridView mGridView;
     private CacheAdapter gridCacheAdapter;
     private TextView mNote;
-
-    private LinkedList<VideoData> videosListNew;
-    private LinkedList<VideoData> videosListOld;
-
-    private VideoProvider provider;
-    private CacheContainer cacheContainer;
 
     private boolean isScreenDirection;
     @Override
@@ -56,14 +49,11 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         singleton = VideoBookApplication.getInstance();
-        cacheContainer = new CacheContainer(this);
+
 
         mGridView = (GridView) findViewById(R.id.gridView);
         gridCacheAdapter =new CacheAdapter(this,R.layout.item);
         mNote = (TextView) findViewById(R.id.note);
-        provider = new VideoProvider(this);
-        videosListNew = new LinkedList<>();
-        videosListOld = new LinkedList<>();
 
         setLister();
         initData();
@@ -85,18 +75,8 @@ public class MainActivity extends AppCompatActivity {
         gridCacheAdapter.itemHeight = gridCacheAdapter.itemWidth * 240 / 360;
         Log.d(TAG,"itemWidth="+gridCacheAdapter.itemWidth+" gridCacheAdapter="+gridCacheAdapter.itemHeight);
 
-        videosListNew = provider.getList();
-        MainActivity.singleton.urls.clear();
-        if(videosListNew.isEmpty())
-            mNote.setVisibility(View.VISIBLE);
-
-        for(VideoData each : videosListNew){
-            MainActivity.singleton.urls.add(each);
-        };
-        videosListOld = (LinkedList<VideoData>) MainActivity.singleton.urls.clone();
-
         mGridView.setAdapter(gridCacheAdapter);
-
+        gridCacheAdapter.notifyDataSetChanged();
     }
     private int getMinValue(int value1,int value2){
         return value1>value2 ? value2:value1;
@@ -118,13 +98,22 @@ public class MainActivity extends AppCompatActivity {
         mGridView.setOnItemClickListener(new OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
                 Log.d(TAG, "" + position);
-                String path=videosListNew.get(position).getPath();
+                String path=singleton.urls.get(position).getPath();
                 Log.d(TAG,"文件路径:"+path);
                 Uri uri = Uri.parse(path);
                 //调用系统自带的播放器
                 Intent intent = new Intent(Intent.ACTION_VIEW);
                 intent.setDataAndType(uri, "video/mp4");
                 startActivity(intent);
+            }
+        });
+
+        mGridView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                Log.d(TAG,"onItemLongClick="+position);
+                showDelDialog(position);
+                return false;
             }
         });
 
@@ -140,6 +129,40 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+
+    protected void showDelDialog(final int position) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+        builder.setTitle("Delete the file?");
+
+        builder.setMessage(singleton.urls.get(position).getTitle());
+
+        builder.setPositiveButton("Sure", new DialogInterface.OnClickListener() {
+
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+                String path=singleton.urls.get(position).getPath();
+                gridCacheAdapter.removeItem(singleton.urls.get(position));
+                File delfile = new File(path);
+                DataCleanManager.deleteDirectoryOrFile(delfile);
+                Uri data = Uri.parse("file://" +path);
+                sendBroadcast(new  Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, data));
+                Log.d(TAG,"del.....[ "+path);
+                gridCacheAdapter.notifyDataSetChanged();
+            }
+        });
+
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+
+        builder.create().show();
+    }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
@@ -147,85 +170,13 @@ public class MainActivity extends AppCompatActivity {
             Log.d(TAG,"is action_about");
             this.aboutDialog();
             return true;
-//        }else if (id == R.id.action_settings) {
-//            cacheContainer.clear();
-//            Log.d(TAG,"is About");
-//            return true;
         }else if (id == R.id.action_refresh){
             Log.d(TAG,"is refresh");
-            refreshData();
+            gridCacheAdapter.clearCache();
+            gridCacheAdapter.notifyDataSetChanged();
         }
 
         return super.onOptionsItemSelected(item);
-    }
-
-    private void refreshData() {
-        cacheContainer.clear();
-        compareList();
-
-        gridCacheAdapter.notifyDataSetChanged();
-    }
-
-    private void compareList(){
-        videosListNew.clear();
-        videosListNew = provider.getList();
-        mNote.setVisibility(View.INVISIBLE);
-
-        if(videosListOld.isEmpty() && videosListNew.isEmpty()){
-            Log.d(TAG,"都没有！！");
-            Toast.makeText(getApplicationContext(), "no movie", Toast.LENGTH_SHORT).show();
-            mNote.setVisibility(View.VISIBLE);
-            gridCacheAdapter.removeAllItem();
-        }else if(videosListOld.isEmpty() && videosListNew.size()>0){
-            //如果之前无任何连接设备，新列表全部添加
-            Log.d(TAG,"全部添加");
-            for(VideoData each:videosListNew){
-                gridCacheAdapter.addItem(each);
-            }
-        }else if(videosListNew.isEmpty() && videosListOld.size()>0){
-            //如果新列表为空，老列表设备全部删除
-            Log.d(TAG,"全部删除");
-            gridCacheAdapter.removeAllItem();
-            Toast.makeText(getApplicationContext(), "no movie", Toast.LENGTH_SHORT).show();
-            mNote.setVisibility(View.VISIBLE);
-        }else if(videosListNew.size()>0 && videosListOld.size()>0 ){
-            Log.d(TAG,"都不为空");
-            //添加新设备
-            for(int i=0;i<videosListNew.size();i++){
-                boolean addflag=true;
-
-                for(int j=0;j<videosListOld.size();j++){
-                    if(videosListNew.get(i).getPath().equals(videosListOld.get(j).getPath())){
-                        addflag=false;
-                        break;
-                    }
-                }
-                if(addflag){
-                    Log.d(TAG,"添加"+videosListNew.get(i).getPath());
-                    gridCacheAdapter.addItem(videosListNew.get(i));
-                }
-            }
-
-            //删除设备
-            for(int i=0;i<videosListOld.size();i++){
-                boolean delflag=true;
-                for(int j=0;j<videosListNew.size();j++){
-                    if(videosListOld.get(i).getPath().equals(videosListNew.get(j).getPath())){
-                        delflag=false;
-                        break;
-                    }
-                }
-                if(delflag){
-                    Log.d(TAG,"删除"+videosListOld.get(i).getPath());
-                    gridCacheAdapter.removeItem(videosListOld.get(i));
-                }
-            }
-        }
-        videosListOld = (LinkedList<VideoData>) this.singleton.urls.clone();
-        if(this.singleton.urls.isEmpty()){
-            Log.d(TAG,"清空了");
-            videosListOld.clear();
-        }
     }
 
     /**
@@ -236,8 +187,8 @@ public class MainActivity extends AppCompatActivity {
         super.onConfigurationChanged(newConfig);
 
         int lastIndex = mGridView.getFirstVisiblePosition();
-        Log.d(TAG,"mGridView.first()="+mGridView.getFirstVisiblePosition());
-        Log.d(TAG,"mGridView.last()="+mGridView.getLastVisiblePosition());
+//        Log.d(TAG,"mGridView.first()="+mGridView.getFirstVisiblePosition());
+//        Log.d(TAG,"mGridView.last()="+mGridView.getLastVisiblePosition());
         if(newConfig.orientation==Configuration.ORIENTATION_PORTRAIT){
            // Toast.makeText(MainActivity.this, "现在是竖屏", Toast.LENGTH_SHORT).show();
             mGridView.setNumColumns(2);
@@ -274,7 +225,7 @@ public class MainActivity extends AppCompatActivity {
         AlertDialog.Builder builder=new AlertDialog.Builder(this);  //先得到构造器
         builder.setTitle("About"); //设置标题
         String alert1 = "Version: "+getPackageInfo(this).versionName;
-        String alert2 = "Default Path："+VideoProvider.ASSIGN_PATH;
+        String alert2 = "Default Video Path："+VideoProvider.ASSIGN_PATH;
         builder.setMessage(alert1 +"\n"+ alert2);
         builder.setIcon(R.drawable.ic_launcher);//设置图标，图片id即可
         //参数都设置完成了，创建并显示出来
@@ -295,5 +246,14 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return pi;
+    }
+
+
+    @Override
+    public void noVideo(boolean isNo) {
+        if(isNo)
+            this.mNote.setVisibility(View.VISIBLE);
+        else
+            this.mNote.setVisibility(View.INVISIBLE);
     }
 }

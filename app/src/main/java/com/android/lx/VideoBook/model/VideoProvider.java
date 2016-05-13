@@ -72,6 +72,8 @@ public class VideoProvider implements AbstructProvider {
                     if(path.contains(ASSIGN_PATH))
                     {
                         list.add(video);
+                    }else{
+                        Log.d(TAG,"ignore path="+path);
                     }
               //      Log.d(TAG,"path="+path);
                 }

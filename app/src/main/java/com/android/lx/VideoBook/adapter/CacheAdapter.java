@@ -15,8 +15,13 @@ import android.widget.TextView;
 
 import com.android.lx.VideoBook.R;
 import com.android.lx.VideoBook.VideoBookApplication;
+import com.android.lx.VideoBook.model.IUserView;
+import com.android.lx.VideoBook.model.VideoProvider;
 import com.android.lx.VideoBook.persion.VideoData;
+import com.android.lx.VideoBook.util.CacheContainer;
 import com.android.lx.VideoBook.util.ImageDownloader;
+
+import java.util.LinkedList;
 
 /**
  * 使用列表缓存过去的Item
@@ -25,6 +30,9 @@ import com.android.lx.VideoBook.util.ImageDownloader;
  */
 public class CacheAdapter extends BaseAdapter {
     private static final String TAG = "CacheAdapter";
+    private IUserView mUserView;
+    private VideoProvider provider;
+    private CacheContainer cacheContainer;
 
     private static VideoBookApplication singleton;
     private ImageDownloader downloader;
@@ -32,10 +40,13 @@ public class CacheAdapter extends BaseAdapter {
     private Context mContext;
     private LayoutInflater inflater;
     private int layoutResourceId;
-   // public List<Integer> lstPosition=new ArrayList<Integer>();
-   // public LinkedList<View> lstView=new LinkedList<View>();
+    private LinkedList<VideoData> videosListNew;
+    private LinkedList<VideoData> videosListOld;
+
     public int itemWidth = 360;
     public int itemHeight = 240;
+
+
 
     public class Item {
         public String itemImageURL;
@@ -54,14 +65,36 @@ public class CacheAdapter extends BaseAdapter {
 
     public CacheAdapter(Context c,int layoutResourceId) {
         this.mContext = c;
+        this.mUserView = (IUserView) c;
         this.layoutResourceId = layoutResourceId;
         this.downloader = new ImageDownloader();
+        this.inflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
         this.singleton = VideoBookApplication.getInstance();
-        inflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        this.provider = new VideoProvider(mContext);
+        this.cacheContainer = new CacheContainer(mContext);
+        this.singleton.urls = provider.getList();
+
+        this.videosListNew = (LinkedList<VideoData>) this.singleton.urls.clone();
+        this.videosListOld =  (LinkedList<VideoData>) this.singleton.urls.clone();
+
+    }
+    public void clearCache() {
+        cacheContainer.clear();
+    }
+    @Override
+    public void notifyDataSetChanged() {
+        compareList();
+        super.notifyDataSetChanged();
     }
 
     @Override
     public int getCount() {
+        if(singleton.urls.size()>0)
+            mUserView.noVideo(false);
+        else
+            mUserView.noVideo(true);
+
         return singleton.urls.size();
     }
 
@@ -136,6 +169,64 @@ public class CacheAdapter extends BaseAdapter {
     public void removeItem(VideoData obj){
         Log.d(TAG,"remove "+obj.getPath());
         this.singleton.urls.remove(obj);
+    }
+
+
+    private void compareList(){
+        videosListNew.clear();
+        videosListNew = provider.getList();
+
+        if(videosListOld.isEmpty() && videosListNew.isEmpty()){
+            Log.d(TAG,"都没有！！");
+            this.removeAllItem();
+        }else if(videosListOld.isEmpty() && videosListNew.size()>0){
+            //如果之前无任何连接设备，新列表全部添加
+            Log.d(TAG,"全部添加");
+            for(VideoData each:videosListNew){
+                this.addItem(each);
+            }
+        }else if(videosListNew.isEmpty() && videosListOld.size()>0){
+            //如果新列表为空，老列表设备全部删除
+            Log.d(TAG,"全部删除");
+            this.removeAllItem();
+        }else if(videosListNew.size()>0 && videosListOld.size()>0 ){
+            Log.d(TAG,"都不为空");
+            //添加新设备
+            for(int i=0;i<videosListNew.size();i++){
+                boolean addflag=true;
+
+                for(int j=0;j<videosListOld.size();j++){
+                    if(videosListNew.get(i).getPath().equals(videosListOld.get(j).getPath())){
+                        addflag=false;
+                        break;
+                    }
+                }
+                if(addflag){
+                    Log.d(TAG,"添加"+videosListNew.get(i).getPath());
+                    this.addItem(videosListNew.get(i));
+                }
+            }
+
+            //删除设备
+            for(int i=0;i<videosListOld.size();i++){
+                boolean delflag=true;
+                for(int j=0;j<videosListNew.size();j++){
+                    if(videosListOld.get(i).getPath().equals(videosListNew.get(j).getPath())){
+                        delflag=false;
+                        break;
+                    }
+                }
+                if(delflag){
+                    Log.d(TAG,"删除"+videosListOld.get(i).getPath());
+                    this.removeItem(videosListOld.get(i));
+                }
+            }
+        }
+        videosListOld = (LinkedList<VideoData>) this.singleton.urls.clone();
+        if(this.singleton.urls.isEmpty()){
+            Log.d(TAG,"清空了");
+            videosListOld.clear();
+        }
     }
 
     public void removeAllItem(){
