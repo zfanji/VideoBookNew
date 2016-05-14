@@ -3,11 +3,18 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="com.android.lamvu.VideoBook.MainActivity">
 
+    <item
+        android:id="@+id/action_search"
+        app:actionViewClass="android.widget.SearchView"
+        android:icon="@android:drawable/ic_menu_search"
+        app:showAsAction="ifRoom|collapseActionView"
+        android:title="@string/action_search"/>
+
     <item android:id="@+id/action_refresh"
         android:title="@string/action_refresh"
         android:orderInCategory="80"
         android:icon="@android:drawable/stat_notify_sync_noanim"
-        app:showAsAction="ifRoom" />
+        app:showAsAction="ifRoom|withText" />
 
     <!--<item-->
         <!--android:id="@+id/action_settings"-->
