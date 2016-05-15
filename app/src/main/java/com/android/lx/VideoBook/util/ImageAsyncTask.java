@@ -1,14 +1,17 @@
 package com.android.lx.VideoBook.util;
 
+import android.content.Context;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.ThumbnailUtils;
 import android.os.AsyncTask;
 import android.provider.MediaStore;
+import android.util.Log;
+import android.view.View;
 import android.widget.ImageView;
 
 import com.android.lx.VideoBook.VideoBookApplication;
-
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -28,31 +31,31 @@ public class ImageAsyncTask {
 	private VideoBookApplication singleton;
 	private BitmapDownloaderTask task;
 	private String url, fileName;
-	
 	public ImageAsyncTask() {
 		this.singleton = VideoBookApplication.getInstance();
 	}
-	
-	public void download(ImageView imageView, int position,int width,int height) {
-		
+	private int  mItemPosition;
+
+	public void download(ImageView imageView, Cursor cursor, int width, int height) {
 		// taskCache saves task related url.
-		// If task is not null, remove the task and create new task. 
+		// If task is not null, remove the task and create new task.
 		// After then start downloading bitmap image.
-		
-		url = singleton.urls.get(position).getPath();
+
+		url =  cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DATA));
+
 		task = singleton.taskCache.get(url);
-		fileName = singleton.keyToFilename(url);
-	//	Log.d(TAG,"文件名: "+fileName);
+		fileName = StringUtil.keyToFilename(url);
+		//	Log.d(TAG,"文件名: "+fileName);
 		if(task != null) {
 			task.cancel(true);
-			singleton.taskCache.remove(url);				
+			singleton.taskCache.remove(url);
 		}
-		
+
 		this.task = new BitmapDownloaderTask(imageView,width,height);
 		task.execute(url);
-		singleton.taskCache.put(url, task);										
+		singleton.taskCache.put(url, task);
 	}
-	
+
 	public void cancel(boolean cancel) {	
 		task.cancel(cancel);
 		singleton.taskCache.remove(url);
@@ -85,14 +88,15 @@ public class ImageAsyncTask {
         // If you can't find int the memory Cache, find it in the disk Cache.
         // If you can't find in the disk Cache, then you really download.
         
-      	if(CacheContainer.getMemory(url) != null) {
-      		return (Bitmap)CacheContainer.getMemory(url);
-      	}
-      	
-      	if(CacheContainer.getDisk(fileName) != null) {
-      		return (Bitmap)CacheContainer.getDisk(fileName);
-      	}
-      	
+//      	if(CacheContainer.getMemory(url) != null) {
+//      		return (Bitmap)CacheContainer.getMemory(url);
+//      	}
+//
+//      	if(CacheContainer.getDisk(fileName) != null) {
+//      		return (Bitmap)CacheContainer.getDisk(fileName);
+//      	}
+
+
         return getBitmap(url,mWidth,mHeight);
     }
 
@@ -104,7 +108,8 @@ public class ImageAsyncTask {
     protected void onPostExecute(Bitmap bitmap) {
 			if(bitmap != null) {
 				ImageView imageView = imageViewReference.get();
-				imageView.setImageBitmap(bitmap);						
+				Log.d(TAG,"setImageBitmap");
+				imageView.setImageBitmap(bitmap);
 				
 				// Save the bitmap into memory and disk cache.
 				
@@ -128,7 +133,7 @@ public class ImageAsyncTask {
 
   public Bitmap getBitmap(String url,int width,int height) {
 
-	//Log.w(TAG,"getBitmap~~~~~~"+url);
+	Log.w(TAG,"getBitmap~~~~~~"+url);
     try {
 		System.setProperty("http.keepAlive", "false");
 //        URL aURL = new URL(url);

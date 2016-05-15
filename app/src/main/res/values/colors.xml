@@ -13,4 +13,6 @@
     <color name="half_transparent">#80000000</color>
     <color name="sound_level">#ff009688</color>
     <color name="sound_background">#4c000000</color>
+    <color name="greed">#30BC79</color>
+    <color name="halfwhite">#44ffffff</color>
 </resources>

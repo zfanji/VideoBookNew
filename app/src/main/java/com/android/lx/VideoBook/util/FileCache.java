@@ -97,7 +97,7 @@ public class FileCache {
 	
 	public void write(String defaultPath, String fileName) {
 		synchronized (mFileCacheLock) {
-			String newKey = singleton.keyToFilename(fileName);
+			String newKey = StringUtil.keyToFilename(fileName);
 			copyFile(defaultPath, newKey);
 			putCacheFileToMap(new File(newKey));
 			checkMaxSize();			
