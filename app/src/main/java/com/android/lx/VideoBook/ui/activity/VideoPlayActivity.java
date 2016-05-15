@@ -7,6 +7,8 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.media.MediaPlayer;
@@ -97,7 +99,7 @@ public class VideoPlayActivity extends BaseActivity implements AdapterView.OnIte
         int id = item.getItemId();
         if (id == R.id.action_about) {
             Log.d(TAG, "is action_about");
-         //   this.aboutDialog();
+            this.aboutDialog();
             return true;
         } else if (id == R.id.action_refresh) {
             Log.d(TAG, "is refresh");
@@ -295,6 +297,33 @@ public class VideoPlayActivity extends BaseActivity implements AdapterView.OnIte
         });
 
         builder.create().show();
+    }
+
+    private void aboutDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);  //先得到构造器
+        builder.setTitle("About"); //设置标题
+        String alert1 = "Version: " + getPackageInfo(this).versionName;
+        String alert2 = "Default Video Path：" + this.ASSIGN_PATH;
+        builder.setMessage(alert1 + "\n" + alert2);
+        builder.setIcon(R.drawable.ic_launcher);//设置图标，图片id即可
+        //参数都设置完成了，创建并显示出来
+        builder.create().show();
+    }
+
+    private static PackageInfo getPackageInfo(Context context) {
+        PackageInfo pi = null;
+
+        try {
+            PackageManager pm = context.getPackageManager();
+            pi = pm.getPackageInfo(context.getPackageName(),
+                    PackageManager.GET_CONFIGURATIONS);
+
+            return pi;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return pi;
     }
 
     @Override
